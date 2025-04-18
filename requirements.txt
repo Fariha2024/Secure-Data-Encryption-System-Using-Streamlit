@@ -1,4 +1,5 @@
 
 - Python 3.9+
 - Streamlit
-- cryptography
+cryptography  3.x.x
+

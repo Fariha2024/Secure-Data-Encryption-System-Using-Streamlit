@@ -26,7 +26,7 @@ def store_data(encrypted_text: str, passkey: str, use_persistence=False) -> bool
     }
 
     if use_persistence:
-        stored_data = load_data_from_file()
+        stored_data = load_data()
         stored_data[user_key] = entry
         save_data_to_file(stored_data)
     else:
@@ -38,7 +38,7 @@ def get_data(encrypted_text: str, use_persistence=False) -> dict | None:
     user_key = f"{st.session_state.current_user}_{encrypted_text}"
 
     if use_persistence:
-        stored_data = load_data_from_file()
+        stored_data = load_data()
         return stored_data.get(user_key)
     else:
         return in_memory_data.get(user_key)

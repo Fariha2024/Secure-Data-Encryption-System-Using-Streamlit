@@ -53,9 +53,10 @@ def main():
     
     if os.path.exists(css_file_path):
         with open(css_file_path) as f:
-            st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-    else:
-        st.error(f"CSS file not found: {css_file_path}")
+            css = f.read()
+            st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
+    #else:
+     #   st.error(f"CSS file not found: {css_file_path}")
     
     st.title("🔒 Secure Data Encryption System")
     load_data()

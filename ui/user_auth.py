@@ -19,6 +19,7 @@ def show_user_auth_page():
             st.session_state.authenticated = True
             st.session_state.page = "Home"
             st.success(f"✅ Logged in as {username}")
+            st.rerun()
         else:
             st.error("❌ Invalid credentials!")
     

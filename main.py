@@ -1,4 +1,3 @@
-# File: SecureDataEncryptionSystem/main.py
 import os
 import streamlit as st
 import time
@@ -10,7 +9,7 @@ from ui.user_auth import show_user_auth_page
 from core.storage import load_data
 from core.security import (
     init_session_state, check_reauthorization_required,
-    is_locked_out, is_session_expired
+    is_locked_out
 )
 
 # Set app title and favicon
@@ -18,6 +17,18 @@ st.set_page_config(page_title="Secure Data Encryption System", page_icon="🔒")
 
 # 🔐 Initialize session variables (IMPORTANT)
 init_session_state()
+
+def is_session_expired():
+    """
+    Check if the session has expired due to inactivity.
+    """
+    session_expiry_duration = 30 * 60  # 30 minutes in seconds
+    
+    if 'session_start_time' in st.session_state:
+        elapsed_time = time.time() - st.session_state.session_start_time
+        if elapsed_time > session_expiry_duration:
+            return True
+    return False
 
 # 🔐 Early protection checks
 if is_locked_out():
@@ -29,7 +40,7 @@ if is_locked_out():
 if is_session_expired():
     st.error("⏱️ Session expired due to inactivity.")
     st.session_state.authenticated = False
-    st.session_state.page = "User Auth"
+    st.session_state.page = "Login"
     st.stop()
 
 # Set default page
@@ -42,18 +53,31 @@ def main():
     
     if os.path.exists(css_file_path):
         with open(css_file_path) as f:
-            st.markdown(f"<style>{css_file_path}</style>", unsafe_allow_html=True)
+            st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
     else:
         st.error(f"CSS file not found: {css_file_path}")
     
     st.title("🔒 Secure Data Encryption System")
     load_data()
 
-    menu = ["User Auth", "Home", "Store Data", "Retrieve Data", "Login"]
-    choice = st.sidebar.selectbox("Navigation", menu, index=menu.index(st.session_state.page))
+    # 👤 Dynamic sidebar menu based on authentication
+    if st.session_state.get('authenticated'):
+        menu = ["Home", "Store Data", "Retrieve Data", "Logout"]
+    else:
+        menu = ["User Auth", "Login"]
+
+    choice = st.sidebar.selectbox("Navigation", menu)
     st.session_state.page = choice
 
-    # 🔐 Navigation-level access control (FIXED)
+    # 👋 Handle Logout action
+    if st.session_state.page == "Logout":
+        st.session_state.authenticated = False
+        st.session_state.current_user = None
+        st.session_state.page = "User Auth"
+        st.success("✅ Logged out successfully!")
+        st.rerun()
+
+    # 🔐 Navigation-level access control
     if 'current_user' not in st.session_state or not st.session_state.authenticated:
         if st.session_state.page not in ["User Auth", "Login"]:
             st.warning("🔒 Please authenticate first.")
